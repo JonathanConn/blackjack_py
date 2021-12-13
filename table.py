@@ -3,58 +3,62 @@ from player import Player
 from dealer import Dealer
 
 class Table:
-    def __init__(self, numOfPlayers=1):
+    def __init__(self, playerNames=['Player']):
         self.shoe = Shoe()
-        self.dealer = Dealer()
-        self.players = [Player()] * numOfPlayers
+        self.dealer = Dealer('Dealer')
+        self.players = [Player(x) for x in playerNames]
     
     def __str__(self):               
-        s = f'Dealer {self.dealer.hand} -> {self.dealer.getCount()}\n'
-
-        for p in self.players: s += p
-
+        s = str(self.dealer)
+        for p in self.players: s += str(p)
         return s
 
-    def hit(self, player):
-        player.hand.append(self.shoe.getCard())
+
+    def hit(self, p):
+        p.hand.append(self.shoe.getCard())
+        p.update()
+
 
     def deal(self):        
         for i in range(2):
             self.hit(self.dealer)
+            for p in self.players: self.hit(p)
 
-            for p in self.players:
-                self.hit(p)
-   
-    def determineWinner(self):
-        
-        dealerCount = self.dealer.getCount()
 
-        for p in self.players:
-            playerCount = p.getCount()
-            
-            if playerCount > 21:
-                print(f'Player busts')
+    def updateAll(self):
+        self.dealer.updateCount()
+        for p in players: p.updateCount()
 
-            elif dealerCount > 21:
-                print(f'Dealer busts, player wins')
 
-            elif playerCount == dealerCount:
-                print(f'Player Pushes')
+    def _turnResult(self, p):
+        if p.bust: print(f'{p.name} busted.')
+        if p.bj: print(f'{p.name} has 21')
 
-            elif playerCount > dealerCount:
-                print(f'Player Wins')
 
-            else:
-                print(f'Dealer Wins')
+    def playersTurn(self):
+        for p in self.players: 
+            while not p.bust and not p.bj and p.option():            
+                self.hit(p)            
+                print(p)
+            self._turnResult(p)
+    
+    def dealersTurn(self):
+        print(f'debug {str(self.dealer)}')
+        while self.dealer.count < 17:
+            self.hit(self.dealer)
+            print(self.dealer)
+        self._turnResult(self.dealer)
+    
 
 table = Table()
 
 table.deal()
+
 print(table)
 
 table.playersTurn()
+
 table.dealersTurn()
 
-table.determineWinner()
-
+print(table)
 
